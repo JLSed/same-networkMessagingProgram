@@ -1,3 +1,15 @@
+/*
+ Made by Gambling Addict Gatherings Offcials of STI Nova BS201
+
+ Members being:
+ John Lawrence Sedillo - Main Programmer
+ John Christian Talamayan - UI Designer
+ Jaycee Mark Ong - UI Designer
+
+ https://github.com/JLSed/same-networkMessagingProgram
+ 
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
