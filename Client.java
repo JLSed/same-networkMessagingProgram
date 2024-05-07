@@ -5,7 +5,7 @@
  Hygienic Power Rangers Novaliches Proper
 
 
- Members and Contributers being:
+ Members and Contributors being:
 
  John Lawrence Sedillo - Main Programmer
  John Christian Talamayan - UI Designer
