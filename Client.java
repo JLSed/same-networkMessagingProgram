@@ -1,13 +1,17 @@
 /*
- Made by Gambling Addict Gatherings Offcials of STI Nova BS201
+ Made by
+ Gambling Addicts Gathering Offcials of STI Nova BS201
+ and
+ Hygienic Power Rangers Novaliches Proper
 
- Members being:
+
+ Members and Contributers being:
+
  John Lawrence Sedillo - Main Programmer
  John Christian Talamayan - UI Designer
  Jaycee Mark Ong - UI Designer
 
  https://github.com/JLSed/same-networkMessagingProgram
- 
  */
 
 import javax.swing.*;
@@ -152,7 +156,6 @@ public class Client extends JFrame {
                 if (newClientIP != null && !newClientIP.isEmpty() && VerifyClientIP(newClientIP)) {
                     contactInfo.put(contactName, newClientIP);
                 }
-
                 break;
 
             default:
@@ -199,7 +202,6 @@ public class Client extends JFrame {
         centerPanel.add(new JScrollPane(currentMessageScreen));
         centerPanel.revalidate();
         centerPanel.repaint();
-
     }
 
     private void resetButton(JButton button) {
@@ -208,7 +210,6 @@ public class Client extends JFrame {
                 com.setBackground(null);
             }
         }
-
         // for highlighting which person you are talking to
         button.setBackground(Color.GREEN);
     }
