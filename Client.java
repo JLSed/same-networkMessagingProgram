@@ -15,11 +15,16 @@
  */
 
 import javax.swing.*;
+import javax.swing.text.html.Option;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.io.*;
+import java.net.*;
 
 public class Client extends JFrame {
     private static JPanel clientContainer;
@@ -31,12 +36,33 @@ public class Client extends JFrame {
     private JButton btnEditClient;
     private String lastInteractedClient = "";
     private JPanel chatContainer;
+    private String serverAddress;
+    private int port;
 
     public Client() {
         setTitle("SN Message");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+
+        // opening message
+        JOptionPane.showMessageDialog(null,
+                "\tWelcome to SN Message. \n\n To get started Please input your server's IP");
+
+        serverAddress = JOptionPane.showInputDialog(null, "Server IP: ", "Connect to Server",
+                JOptionPane.PLAIN_MESSAGE);
+        // TODO:
+        try {
+
+            ServerConnect("192.168.1.24", 8080);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (serverAddress != null && !serverAddress.isEmpty() && VerifyClientIP(serverAddress)) {
+            JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
 
         JPanel sideContainer = new JPanel();
         sideContainer.setLayout(new BorderLayout());
@@ -214,9 +240,26 @@ public class Client extends JFrame {
         button.setBackground(Color.GREEN);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
+    // TODO: some fixing and add connecting loading
+    private static void ServerConnect(String serverAddress, int port) throws Exception {
+        try {
+            Socket socket = new Socket(serverAddress, port);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println("Connected");
 
+            System.out.println(socket);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void main(String[] args) {
+        // ServerConnect("192.168.1.24", 8080);
+
+        SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new Client();
