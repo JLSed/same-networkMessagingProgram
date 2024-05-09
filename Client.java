@@ -15,14 +15,12 @@
  */
 
 import javax.swing.*;
-import javax.swing.text.html.Option;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.io.*;
 import java.net.*;
 
@@ -37,7 +35,6 @@ public class Client extends JFrame {
     private String lastInteractedClient = "";
     private JPanel chatContainer;
     private String serverAddress;
-    private int port;
 
     public Client() {
         setTitle("SN Message");
@@ -49,20 +46,35 @@ public class Client extends JFrame {
         JOptionPane.showMessageDialog(null,
                 "\tWelcome to SN Message. \n\n To get started Please input your server's IP");
 
-        serverAddress = JOptionPane.showInputDialog(null, "Server IP: ", "Connect to Server",
-                JOptionPane.PLAIN_MESSAGE);
-        // TODO:
-        try {
+        do {
+            serverAddress = JOptionPane.showInputDialog(null, "Server IP: ", "Connect to Server",
+                    JOptionPane.PLAIN_MESSAGE);
 
-            ServerConnect("192.168.1.24", 8080);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            if (serverAddress != null && !serverAddress.isEmpty() && VerifyClientIP(serverAddress)) {
+                // to check if server is available
+                try {
+                    int choice = JOptionPane.showOptionDialog(null, "Connecting to Server " + serverAddress + "...",
+                            "Connect to Server", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+                            null, null);
+                    switch (choice) {
+                        case JOptionPane.CANCEL_OPTION:
+                            serverAddress = "";
+                            break;
+                    }
+                    ServerConnect(serverAddress, 8080);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e.getMessage(), "Error Occured", JOptionPane.ERROR_MESSAGE);
+                }
+            } else if (serverAddress == null) {
+                // this will exit the program when the user click cancel button
+                System.exit(0);
 
-        if (serverAddress != null && !serverAddress.isEmpty() && VerifyClientIP(serverAddress)) {
-            JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
+            } else {
+                JOptionPane.showMessageDialog(null, "Cannot Connect to Server. Please check your IP Format",
+                        "Invalid IP Format", JOptionPane.INFORMATION_MESSAGE);
+                serverAddress = "";
+            }
+        } while (serverAddress.isEmpty());
 
         JPanel sideContainer = new JPanel();
         sideContainer.setLayout(new BorderLayout());
@@ -242,17 +254,15 @@ public class Client extends JFrame {
 
     // TODO: some fixing and add connecting loading
     private static void ServerConnect(String serverAddress, int port) throws Exception {
-        try {
-            Socket socket = new Socket(serverAddress, port);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            System.out.println("Connected");
+        Socket socket = new Socket(serverAddress, port);
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        System.out.println("Connected");
+        JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
+                JOptionPane.INFORMATION_MESSAGE);
+        socket.close();
 
-            System.out.println(socket);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println(socket);
 
     }
 
