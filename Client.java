@@ -46,6 +46,7 @@ public class Client extends JFrame {
         JOptionPane.showMessageDialog(null,
                 "\tWelcome to SN Message. \n\n To get started Please input your server's IP");
 
+        // connecting to server checking messages
         do {
             serverAddress = JOptionPane.showInputDialog(null, "Server IP: ", "Connect to Server",
                     JOptionPane.PLAIN_MESSAGE);
@@ -61,9 +62,10 @@ public class Client extends JFrame {
                             serverAddress = "";
                             break;
                     }
-                    ServerConnect(serverAddress, 8080);
+                    ServerConnectCheck(serverAddress, 8080);
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, e.getMessage(), "Error Occured", JOptionPane.ERROR_MESSAGE);
+                    serverAddress = "";
                 }
             } else if (serverAddress == null) {
                 // this will exit the program when the user click cancel button
@@ -86,7 +88,7 @@ public class Client extends JFrame {
         sideContainer.add(clientLabel, BorderLayout.NORTH);
         sideContainer.add(scrollSideContainer, BorderLayout.CENTER);
 
-        btnAddClient = new JButton("New Contact");
+        btnAddClient = new JButton("Add Contact");
         btnAddClient.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnAddClient.addActionListener(new ActionListener() {
             @Override
@@ -95,7 +97,9 @@ public class Client extends JFrame {
                 if (clientIP != null && !clientIP.isEmpty()
                         && VerifyClientIP(clientIP)) {
                     String clientName = JOptionPane.showInputDialog("Enter the new contact's name: ");
-                    if (clientName.length() <= 10) {
+                    if (clientName == null) {
+                        // do nothing
+                    } else if (clientName.length() <= 10) {
                         addNewContact(clientName, clientIP);
                     } else {
                         JOptionPane.showMessageDialog(null, "Contact name can only contain 10 characters",
@@ -110,7 +114,7 @@ public class Client extends JFrame {
                 } else if (clientIP != null && !VerifyClientIP(clientIP)) {
                     // checks if the textbox does not match the format of an ip
                     JOptionPane.showMessageDialog(null,
-                            "Please enter the appropriate contact format \n Ex. 192.168.1.1", "Contact Not Added",
+                            "Please enter the appropriate IP format \n Ex. 192.168.1.1", "Contact Not Added",
                             JOptionPane.INFORMATION_MESSAGE);
                 }
 
@@ -157,7 +161,6 @@ public class Client extends JFrame {
                     JOptionPane.showMessageDialog(null, "Select a contact first.");
                 } else {
                     System.out.println(lastInteractedClient);
-                    System.out.println("hekki");
 
                     EditContact(lastInteractedClient);
                 }
@@ -252,9 +255,11 @@ public class Client extends JFrame {
         button.setBackground(Color.GREEN);
     }
 
-    // TODO: some fixing and add connecting loading
-    private static void ServerConnect(String serverAddress, int port) throws Exception {
-        Socket socket = new Socket(serverAddress, port);
+    private static void ServerConnectCheck(String serverAddress, int port) throws Exception {
+        Socket socket = new Socket();
+        // connection request 5 sec timeout
+        socket.connect(new InetSocketAddress(serverAddress, port), 5000);
+        socket.setSoTimeout(5000);
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         System.out.println("Connected");
@@ -266,9 +271,12 @@ public class Client extends JFrame {
 
     }
 
-    public static void main(String[] args) {
-        // ServerConnect("192.168.1.24", 8080);
+    // TODO: this function will run when an unidentified contact messages the user
+    private static void newContactMessage() {
 
+    }
+
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -276,5 +284,4 @@ public class Client extends JFrame {
             }
         });
     }
-
 }
