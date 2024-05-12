@@ -285,16 +285,13 @@ public class Client extends JFrame {
     // TODO: fix receiving message
     private static void AcceptReceivingMessage(Socket socket) {
         try {
-            while (true) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            String message;
+            while ((message = in.readLine()) != null) {
+                JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
+                currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
+                System.out.println(message);
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String message;
-                while ((message = in.readLine()) != null) {
-                    JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
-                    currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
-                    System.out.println(message);
-
-                }
             }
         } catch (Exception e) {
             e.getMessage();
@@ -308,18 +305,26 @@ public class Client extends JFrame {
     }
 
     public static void main(String[] args) {
-        ExecutorService revmsg = Executors.newFixedThreadPool(4);
-        revmsg.submit(new Runnable() {
-            public void run() {
-                AcceptReceivingMessage(socket);
-            }
-        });
+        RunningMethods thread = new RunningMethods();
+        thread.setDaemon(true);
+        thread.start();
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 new Client();
             }
         });
+
+    }
+
+    private static class RunningMethods extends Thread {
+        @Override
+        public void run() {
+            while (true) {
+                AcceptReceivingMessage(socket);
+            }
+        }
 
     }
 }
