@@ -27,7 +27,7 @@ import java.net.*;
 public class Client extends JFrame {
     private static JPanel clientContainer;
     private Map<String, JTextArea> messagePanels;
-    private Map<String, String> contactInfo;
+    private Map<String, String> contactIPinfo;
     private Map<String, JButton> contactButtons;
     private JTextField messageField;
     private JButton btnAddClient;
@@ -35,6 +35,7 @@ public class Client extends JFrame {
     private String lastInteractedClient = "";
     private JPanel chatContainer;
     private String serverAddress;
+    private static Socket socket;
 
     public Client() {
         setTitle("SN Message");
@@ -125,7 +126,7 @@ public class Client extends JFrame {
         add(sideContainer, BorderLayout.LINE_START);
 
         messagePanels = new HashMap<>();
-        contactInfo = new HashMap<>();
+        contactIPinfo = new HashMap<>();
         contactButtons = new HashMap<>();
 
         // gui for chat history
@@ -144,12 +145,13 @@ public class Client extends JFrame {
                 if (!message.isEmpty() && !lastInteractedClient.isEmpty()) {
                     JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
                     currentMessageScreen.append("You: " + message + "\n");
+                    sendingMessage(message, contactIPinfo.get(lastInteractedClient));
                     messageField.setText("");
                 }
             }
         });
 
-        // gui for sending text
+        // gui for text
         JPanel messageContainer = new JPanel(new BorderLayout());
         messageContainer.add(messageField, BorderLayout.CENTER);
 
@@ -195,7 +197,7 @@ public class Client extends JFrame {
             case 1:
                 String newClientIP = JOptionPane.showInputDialog("Input new Contact IP: ");
                 if (newClientIP != null && !newClientIP.isEmpty() && VerifyClientIP(newClientIP)) {
-                    contactInfo.put(contactName, newClientIP);
+                    contactIPinfo.put(contactName, newClientIP);
                 }
                 break;
 
@@ -225,7 +227,7 @@ public class Client extends JFrame {
         JTextArea messageScreen = new JTextArea();
         messageScreen.setEditable(false);
         messagePanels.put(contactName, messageScreen);
-        contactInfo.put(contactName, clientIP);
+        contactIPinfo.put(contactName, clientIP);
         contactButtons.put(contactName, contactButton);
     }
 
@@ -256,18 +258,27 @@ public class Client extends JFrame {
     }
 
     private static void ServerConnectCheck(String serverAddress, int port) throws Exception {
-        Socket socket = new Socket();
+        socket = new Socket();
         // connection request 5 sec timeout
         socket.connect(new InetSocketAddress(serverAddress, port), 5000);
         socket.setSoTimeout(5000);
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         System.out.println("Connected");
         JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
                 JOptionPane.INFORMATION_MESSAGE);
-        socket.close();
 
         System.out.println(socket);
+
+    }
+
+    private static void sendingMessage(String message, String IP) {
+        try {
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            out.println(IP);
+            out.println(message);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
 
     }
 
