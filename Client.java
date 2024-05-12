@@ -34,7 +34,7 @@ public class Client extends JFrame {
     private JButton btnEditClient;
     private static String lastInteractedClient = "";
     private JPanel chatContainer;
-    private String serverAddress;
+    private static String serverAddress;
     private static Socket socket;
 
     public Client() {
@@ -309,5 +309,10 @@ public class Client extends JFrame {
                 new Client();
             }
         });
+
+        if (serverAddress != null) {
+
+        }
+
     }
 }
