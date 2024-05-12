@@ -26,13 +26,13 @@ import java.net.*;
 
 public class Client extends JFrame {
     private static JPanel clientContainer;
-    private Map<String, JTextArea> messagePanels;
-    private Map<String, String> contactIPinfo;
+    private static Map<String, JTextArea> messagePanels;
+    private static Map<String, String> contactIPinfo;
     private Map<String, JButton> contactButtons;
     private JTextField messageField;
     private JButton btnAddClient;
     private JButton btnEditClient;
-    private String lastInteractedClient = "";
+    private static String lastInteractedClient = "";
     private JPanel chatContainer;
     private String serverAddress;
     private static Socket socket;
@@ -145,7 +145,7 @@ public class Client extends JFrame {
                 if (!message.isEmpty() && !lastInteractedClient.isEmpty()) {
                     JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
                     currentMessageScreen.append("You: " + message + "\n");
-                    sendingMessage(message, contactIPinfo.get(lastInteractedClient));
+                    SendingMessage(message, contactIPinfo.get(lastInteractedClient));
                     messageField.setText("");
                 }
             }
@@ -266,18 +266,33 @@ public class Client extends JFrame {
         System.out.println("Connected");
         JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
                 JOptionPane.INFORMATION_MESSAGE);
+        AcceptReceivingMessage(socket);
 
         System.out.println(socket);
 
     }
 
-    private static void sendingMessage(String message, String IP) {
-        try {
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+    private static void SendingMessage(String message, String IP) {
+        try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
             out.println(IP);
             out.println(message);
         } catch (Exception e) {
-            // TODO: handle exception
+            e.getMessage();
+        }
+
+    }
+
+    private static void AcceptReceivingMessage(Socket socket) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+            String message;
+            while ((message = in.readLine()) != null) {
+                JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
+                currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
+
+            }
+        } catch (Exception e) {
+            e.getMessage();
         }
 
     }
