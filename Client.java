@@ -265,9 +265,11 @@ public class Client extends JFrame {
         System.out.println("Connected");
         JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
                 JOptionPane.INFORMATION_MESSAGE);
-        AcceptReceivingMessage(socket);
-
         System.out.println(socket);
+        // TODO: fix receiving message
+        while (true) {
+            AcceptReceivingMessage(socket);
+        }
 
     }
 
@@ -282,6 +284,7 @@ public class Client extends JFrame {
 
     }
 
+    // TODO: fix receiving message
     private static void AcceptReceivingMessage(Socket socket) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
