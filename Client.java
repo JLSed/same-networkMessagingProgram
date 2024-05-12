@@ -262,7 +262,6 @@ public class Client extends JFrame {
         // connection request 5 sec timeout
         socket.connect(new InetSocketAddress(serverAddress, port), 5000);
         socket.setSoTimeout(5000);
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         System.out.println("Connected");
         JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
                 JOptionPane.INFORMATION_MESSAGE);
@@ -273,8 +272,8 @@ public class Client extends JFrame {
     }
 
     private static void SendingMessage(String message, String IP) {
-        try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-
+        try {
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(IP);
             out.println(message);
         } catch (Exception e) {
@@ -284,11 +283,13 @@ public class Client extends JFrame {
     }
 
     private static void AcceptReceivingMessage(Socket socket) {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String message;
             while ((message = in.readLine()) != null) {
                 JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
                 currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
+                System.out.println(message);
 
             }
         } catch (Exception e) {
@@ -309,15 +310,6 @@ public class Client extends JFrame {
                 new Client();
             }
         });
-
-        if (serverAddress != null) {
-            new Runnable() {
-                public void run() {
-                    AcceptReceivingMessage(socket);
-                }
-            };
-
-        }
 
     }
 }
