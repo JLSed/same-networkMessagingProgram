@@ -21,8 +21,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.io.*;
 import java.net.*;
 
@@ -180,7 +178,7 @@ public class Client extends JFrame {
         setVisible(true);
     }
 
-    boolean VerifyClientIP(String clientIP) {
+    private static boolean VerifyClientIP(String clientIP) {
         return clientIP.matches("[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}");
     }
 
@@ -194,6 +192,8 @@ public class Client extends JFrame {
                 String newClientName = JOptionPane.showInputDialog("Input new Contact Name: ");
                 JButton clientButton = contactButtons.get(contactName);
                 clientButton.setText(newClientName);
+                String oldcontact = contactIPinfo.remove(contactName);
+                contactIPinfo.put(newClientName, oldcontact);
                 break;
             // if Contact IP is Selected
             case 1:
@@ -202,14 +202,11 @@ public class Client extends JFrame {
                     contactIPinfo.put(contactName, newClientIP);
                 }
                 break;
-
-            default:
-                break;
         }
 
     }
 
-    void addNewContact(String contactName, String clientIP) {
+    private void addNewContact(String contactName, String clientIP) {
         JButton contactButton = new JButton(contactName);
         contactButton.setHorizontalAlignment(SwingUtilities.LEFT);
         contactButton.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -284,23 +281,43 @@ public class Client extends JFrame {
 
     // TODO: fix receiving message
     private static void AcceptReceivingMessage(Socket socket) {
+
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String message;
+            boolean messengerIPexist = false;
             while ((message = in.readLine()) != null) {
-                JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
-                currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
-                System.out.println(message);
+                // checks if the incoming message is an ip or not
+                if (VerifyClientIP(message)) {
+                    // checks if the sender IP exists in the current contact records
+                    messengerIPexist = contactIPinfo.containsValue(message);
+                } else {
+                    if (messengerIPexist) {
+                        MessageReceived();
+                    } else {
+                        NewContactMessageReceived();
+
+                    }
+                }
 
             }
         } catch (Exception e) {
             e.getMessage();
         }
+    }
+
+    // TODO: make everything non static
+    //
+    //
+    private static void MessageReceived() {
+        JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
+        currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
+        System.out.println(message);
 
     }
 
     // TODO: this function will run when an unidentified contact messages the user
-    private static void newContactMessage() {
+    private static void NewContactMessageReceived() {
 
     }
 
