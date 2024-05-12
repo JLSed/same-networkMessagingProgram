@@ -21,6 +21,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.io.*;
 import java.net.*;
 
@@ -266,10 +268,6 @@ public class Client extends JFrame {
         JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
                 JOptionPane.INFORMATION_MESSAGE);
         System.out.println(socket);
-        // TODO: fix receiving message
-        while (true) {
-            AcceptReceivingMessage(socket);
-        }
 
     }
 
@@ -287,13 +285,16 @@ public class Client extends JFrame {
     // TODO: fix receiving message
     private static void AcceptReceivingMessage(Socket socket) {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String message;
-            while ((message = in.readLine()) != null) {
-                JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
-                currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
-                System.out.println(message);
+            while (true) {
 
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String message;
+                while ((message = in.readLine()) != null) {
+                    JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
+                    currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
+                    System.out.println(message);
+
+                }
             }
         } catch (Exception e) {
             e.getMessage();
@@ -307,6 +308,12 @@ public class Client extends JFrame {
     }
 
     public static void main(String[] args) {
+        ExecutorService revmsg = Executors.newFixedThreadPool(4);
+        revmsg.submit(new Runnable() {
+            public void run() {
+                AcceptReceivingMessage(socket);
+            }
+        });
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
