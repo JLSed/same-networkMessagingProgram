@@ -311,6 +311,11 @@ public class Client extends JFrame {
         });
 
         if (serverAddress != null) {
+            new Runnable() {
+                public void run() {
+                    AcceptReceivingMessage(socket);
+                }
+            };
 
         }
 
