@@ -33,15 +33,21 @@ public class MultiThreadedServer {
             clientsMap.put(clientIp, out);
             
             String inputLine;
+            String currentInteraction = "";
+            String message = "";
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("Received from client " + clientIp + ": " + inputLine);
-
+                if (checkforIP(inputLine)) {
+                    currentInteraction = inputLine;
+                } else {
+                    message = inputLine;
+                    sendMessageToClient(currentInteraction, message);
+                }
                // Process the input if needed
-
                 // Send a message to the specific client
-                String message = "Server message to " + clientIp + ": " + inputLine;
-                sendMessageToClient("192.168.1.22", message);
+            
             }
+            
         } finally {
             System.out.println(clientsMap);
             clientSocket.close();
@@ -57,5 +63,9 @@ public class MultiThreadedServer {
         } else {
             System.out.println("Client " + clientIp + " not found.");
         }
+    }
+
+    public static boolean checkforIP(String IP) {
+        return IP.matches("[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}");
     }
 }
