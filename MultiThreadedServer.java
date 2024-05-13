@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiThreadedServer {
-    private static Map<String, PrintWriter> clientsMap = new HashMap<>(); //location for all the connected clients
-           
+    private static Map<String, PrintWriter> clientsMap = new HashMap<>(); // location for all the connected clients
+
     public static void main(String[] args) throws IOException {
         int port = 8080; // Port to listen on
         ServerSocket serverSocket = new ServerSocket(port);
@@ -27,27 +27,32 @@ public class MultiThreadedServer {
 
     private static void handleClient(Socket clientSocket) throws IOException {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
             String clientIp = clientSocket.getInetAddress().getHostAddress();
             clientsMap.put(clientIp, out);
-            
+
             String inputLine;
             String currentInteraction = "";
             String message = "";
+            String senderIP = "";
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("Received from client " + clientIp + ": " + inputLine);
                 if (checkforIP(inputLine)) {
                     currentInteraction = inputLine;
+                    senderIP = inputLine;
+                    // this send the sender's IP
+                    sendMessageToClient(currentInteraction, senderIP);
                 } else {
+                    // this send the sender's message
                     message = inputLine;
                     sendMessageToClient(currentInteraction, message);
                 }
-               // Process the input if needed
+                // Process the input if needed
                 // Send a message to the specific client
-            
+
             }
-            
+
         } finally {
             System.out.println(clientsMap);
             clientSocket.close();
@@ -66,6 +71,6 @@ public class MultiThreadedServer {
     }
 
     public static boolean checkforIP(String IP) {
-        return IP.matches("[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}");
+        return IP.matches("[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}");
     }
 }
