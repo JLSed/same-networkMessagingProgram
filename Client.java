@@ -38,6 +38,9 @@ public class Client extends JFrame {
     private static Socket socket;
 
     public Client() {
+        RunningMethods thread = new RunningMethods();
+        thread.setDaemon(true);
+        thread.start();
         setTitle("SN Message");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -179,7 +182,7 @@ public class Client extends JFrame {
     }
 
     private static boolean VerifyClientIP(String clientIP) {
-        return clientIP.matches("[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}.[1-9]{1,3}");
+        return clientIP.matches("[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}");
     }
 
     void EditContact(String contactName) {
@@ -256,7 +259,7 @@ public class Client extends JFrame {
         button.setBackground(Color.GREEN);
     }
 
-    private static void ServerConnectCheck(String serverAddress, int port) throws Exception {
+    private void ServerConnectCheck(String serverAddress, int port) throws Exception {
         socket = new Socket();
         // connection request 5 sec timeout
         socket.connect(new InetSocketAddress(serverAddress, port), 5000);
@@ -268,7 +271,7 @@ public class Client extends JFrame {
 
     }
 
-    private static void SendingMessage(String message, String IP) {
+    private void SendingMessage(String message, String IP) {
         try {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(IP);
@@ -280,23 +283,24 @@ public class Client extends JFrame {
     }
 
     // TODO: fix receiving message
-    private static void AcceptReceivingMessage(Socket socket) {
+    private void AcceptReceivingMessage(Socket socket) {
 
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String message;
+            String messengerIP = "";
             boolean messengerIPexist = false;
             while ((message = in.readLine()) != null) {
                 // checks if the incoming message is an ip or not
                 if (VerifyClientIP(message)) {
                     // checks if the sender IP exists in the current contact records
                     messengerIPexist = contactIPinfo.containsValue(message);
+                    messengerIP = message;
                 } else {
                     if (messengerIPexist) {
-                        MessageReceived();
+                        MessageReceived(message);
                     } else {
-                        NewContactMessageReceived();
-
+                        NewContactMessageReceived(messengerIP, message);
                     }
                 }
 
@@ -309,7 +313,7 @@ public class Client extends JFrame {
     // TODO: make everything non static
     //
     //
-    private static void MessageReceived() {
+    private void MessageReceived(String message) {
         JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
         currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
         System.out.println(message);
@@ -317,14 +321,12 @@ public class Client extends JFrame {
     }
 
     // TODO: this function will run when an unidentified contact messages the user
-    private static void NewContactMessageReceived() {
+    private void NewContactMessageReceived(String messengerIP, String message) {
+        addNewContact(messengerIP, messengerIP);
 
     }
 
     public static void main(String[] args) {
-        RunningMethods thread = new RunningMethods();
-        thread.setDaemon(true);
-        thread.start();
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -335,7 +337,7 @@ public class Client extends JFrame {
 
     }
 
-    private static class RunningMethods extends Thread {
+    public class RunningMethods extends Thread {
         @Override
         public void run() {
             while (true) {
