@@ -158,7 +158,7 @@ public class Client extends JFrame {
         JPanel messageContainer = new JPanel(new BorderLayout());
         messageContainer.add(messageField, BorderLayout.CENTER);
 
-        btnEditClient = new JButton("Edit Contact ");
+        btnEditClient = new JButton("Edit Contact");
         btnEditClient.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -282,9 +282,7 @@ public class Client extends JFrame {
 
     }
 
-    // TODO: fix receiving message
     private void AcceptReceivingMessage(Socket socket) {
-
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String message;
@@ -310,9 +308,6 @@ public class Client extends JFrame {
         }
     }
 
-    // TODO: make everything non static
-    //
-    //
     private void MessageReceived(String message) {
         JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
         currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
@@ -320,10 +315,9 @@ public class Client extends JFrame {
 
     }
 
-    // TODO: this function will run when an unidentified contact messages the user
+    // this function will run when an unidentified contact messages the user
     private void NewContactMessageReceived(String messengerIP, String message) {
         addNewContact(messengerIP, messengerIP);
-
     }
 
     public static void main(String[] args) {
