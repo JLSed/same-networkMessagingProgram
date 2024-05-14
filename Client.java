@@ -199,6 +199,10 @@ public class Client extends JFrame {
                 clientButton.setText(newClientName);
                 String oldcontact = contactIPinfo.remove(contactName);
                 contactIPinfo.put(newClientName, oldcontact);
+                JTextArea oldpanel = messagePanels.remove(contactName);
+                messagePanels.put(newClientName, oldpanel);
+                lastInteractedClient = newClientName;
+                switchMessageScreen(newClientName);
                 break;
             // if Contact IP is Selected
             case 1:
