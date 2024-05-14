@@ -38,8 +38,6 @@ public class Client extends JFrame {
     private Socket socket;
     String messengerIP = "";
     boolean messengerIPexist = false;
-    private String publicKey = "";
-    private String privateKey = "";
 
     public Client() {
         RunningMethods thread = new RunningMethods();
@@ -56,8 +54,7 @@ public class Client extends JFrame {
 
         // connecting to server checking messages
         do {
-            serverAddress = JOptionPane.showInputDialog(null, "Server IP: ", "Connect to Server",
-                    JOptionPane.PLAIN_MESSAGE);
+            serverAddress = JOptionPane.showInputDialog(null, "Server IP: ", "Connect to Server", JOptionPane.PLAIN_MESSAGE);
 
             if (serverAddress != null && !serverAddress.isEmpty() && VerifyClientIP(serverAddress)) {
                 // to check if server is available
