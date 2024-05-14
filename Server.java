@@ -1,12 +1,21 @@
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+/*
+ Made by
+ Gambling Addicts Gathering Offcials of STI Nova BS201
+ and
+ Hygienic Power Rangers Novaliches Proper
+
+
+ Members and Contributors being:
+
+ John Lawrence Sedillo - Main Programmer
+
+ https://github.com/JLSed/same-networkMessagingProgram
+ */
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
