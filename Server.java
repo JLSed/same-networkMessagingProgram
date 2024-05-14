@@ -10,6 +10,14 @@ public class Server {
         int port = 8080;
         ServerSocket serverSocket = new ServerSocket(port);
         System.out.println("Server started on port " + port);
+        String publicKey = "";
+        // generates public key
+        try {
+            publicKey = Encryption.GenerateKey();
+        } catch (Exception e) {
+            System.out.println("Error occured while generating public key: " + e.getMessage());
+        }
+        System.out.println(publicKey);
         while (true) {
             Socket clientSocket = serverSocket.accept();
             System.out.println("Client connected: " + clientSocket.getInetAddress());
