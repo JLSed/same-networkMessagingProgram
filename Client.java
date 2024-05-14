@@ -36,7 +36,10 @@ public class Client extends JFrame {
     private JPanel chatContainer;
     private String serverAddress;
     private Socket socket;
+    String messengerIP = "";
+    boolean messengerIPexist = false;
     private String publicKey = "";
+    private String privateKey = "";
 
     public Client() {
         RunningMethods thread = new RunningMethods();
@@ -275,40 +278,43 @@ public class Client extends JFrame {
 
     private void SendingMessage(String message, String IP) {
         try {
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println(IP);
-            out.println(message);
+            OutputStream out = socket.getOutputStream();
+            out.write(Encryption.Encrypt(IP, Encryption.secretKey));
+            out.write(Encryption.Encrypt(message, Encryption.secretKey));
+            out.flush();
+            System.out.println("send");
         } catch (Exception e) {
-            e.getMessage();
+            System.out.println(e.getMessage());
         }
-
     }
 
-    private void AcceptReceivingMessage(Socket socket) {
+    private void AcceptReceivingMessage() {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String message;
-            String messengerIP = "";
-            boolean messengerIPexist = false;
-            while ((message = in.readLine()) != null) {
-                // checks if the incoming message is an ip or not
-                if (VerifyClientIP(message)) {
-                    // checks if the sender IP exists in the current contact records
-                    messengerIPexist = contactIPinfo.containsValue(message);
-                    messengerIP = message;
+            InputStream in = socket.getInputStream();
+            System.out.println(socket);
+            // Receive and decrypt response
+            byte[] buffer = new byte[256];
+            int bytesRead;
+            bytesRead = in.read(buffer);
+            if (bytesRead != -1) {
+                byte[] receivedBytes = new byte[bytesRead];
+                System.arraycopy(buffer, 0, receivedBytes, 0, bytesRead);
+                String response = Encryption.Decrypt(receivedBytes, Encryption.secretKey);
+                if (VerifyClientIP(response)) {
+                    messengerIPexist = contactIPinfo.containsValue(response);
+                    System.out.println(messengerIPexist);
+                    messengerIP = response;
                 } else {
-                    // gets the public key from server
-                    if (publicKey.isEmpty()) {
-                        publicKey = message;
-                        System.out.println(publicKey);
-                    }
+                    System.out.println("else");
                     if (messengerIPexist) {
-                        MessageReceived(message);
+                        System.out.println("if");
+                        MessageReceived(response);
                     } else {
-                        NewContactMessageReceived(messengerIP, message);
+                        NewContactMessageReceived(messengerIP, response);
                     }
-                }
 
+                }
+                System.out.println("Received from server: " + response);
             }
         } catch (Exception e) {
             e.getMessage();
@@ -327,14 +333,6 @@ public class Client extends JFrame {
         addNewContact(messengerIP, messengerIP);
     }
 
-    private EncryptMessage(String message) {
-
-    }
-
-    private DecryptMessage(String message, String privateKey) {
-
-    }
-
     public static void main(String[] args) {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -350,7 +348,7 @@ public class Client extends JFrame {
         @Override
         public void run() {
             while (true) {
-                AcceptReceivingMessage(socket);
+                AcceptReceivingMessage();
             }
         }
 
