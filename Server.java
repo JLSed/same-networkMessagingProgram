@@ -1,83 +1,80 @@
-import java.io.*;
-import java.net.*;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
 public class Server {
-    // location for all the connected clients
-    private static Map<String, PrintWriter> clientsMap = new HashMap<>(); 
-    private static String publicKey = "";
-    public static void main(String[] args) throws IOException {
-        int port = 8080;
-        ServerSocket serverSocket = new ServerSocket(port);
+
+    private static final int PORT = 8080;
+    private static final Map<String, Socket> clientMap = new HashMap<>();
+    public static void main(String[] args) {
         
-        // generates public key
         try {
-            publicKey = Encryption.GenerateKey();
-        } catch (Exception e) {
-            System.out.println("Error occured while generating public key: " + e.getMessage());
-        }
-
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("Client connected: " + clientSocket.getInetAddress());
-
-            // handle client communication
-            new Thread(() -> {
-                try {
-                    handleClient(clientSocket);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }
-    }
-
-    private static void handleClient(Socket clientSocket) throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+            // Generate AES key
             
-            String clientIp = clientSocket.getInetAddress().getHostAddress();
-            clientsMap.put(clientIp, out);
-            // send public key to the client conneted
-            if (!publicKey.isEmpty()) {
-                sendMessageToClient(clientIp, publicKey);
+
+            ServerSocket serverSocket = new ServerSocket(PORT);
+            System.out.println("Server started on port " + PORT);
+
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                String clientAddress = clientSocket.getInetAddress().getHostAddress();
+                clientMap.put(clientAddress, clientSocket);
+
+                new Thread(() -> handleClient(clientSocket)).start();
             }
-            String inputLine;
-            String currentInteraction = "";
-            String message = "";
-            String senderIP = "";
-            while ((inputLine = in.readLine()) != null) {
-                System.out.println("Received from client " + clientIp + ": " + inputLine);
-                if (checkforIP(inputLine)) {
-                    currentInteraction = inputLine;
-                    senderIP = inputLine;
-                    // this send the sender's IP
-                    sendMessageToClient(currentInteraction, senderIP);
-                } else {
-                    // this send the sender's message
-                    message = inputLine;
-                    sendMessageToClient(currentInteraction, message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleClient(Socket clientSocket) {
+        try (InputStream in = clientSocket.getInputStream();
+             OutputStream out = clientSocket.getOutputStream()) {
+                while (true) {
+                    byte[] buffer = new byte[256];
+            int bytesRead = in.read(buffer);
+            if (bytesRead != -1) {
+                byte[] receivedBytes = new byte[bytesRead];
+                System.arraycopy(buffer, 0, receivedBytes, 0, bytesRead);
+
+                // Decrypt the received bytes
+                String receivedMessage = Encryption.Decrypt(receivedBytes, Encryption.secretKey);
+                System.out.println("Received from client: " + receivedMessage);
+
+
+
+
+                // Encrypt response
+                String response = "Server received: " + receivedMessage;
+                byte[] encryptedResponse = Encryption.Encrypt(response, Encryption.secretKey);
+
+                // Send encrypted response
+                out.write(encryptedResponse);
                 }
             }
-
-        } finally {
-            System.out.println(clientsMap);
-            clientSocket.close();
-            clientsMap.remove(clientSocket.getInetAddress().getHostAddress());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public static void sendMessageToClient(String clientIp, String message) {
-        PrintWriter out = clientsMap.get(clientIp);
-        if (out != null) {
-            out.println(message);
-            System.out.println("Sent to client " + clientIp + ": " + message);
+    private static void sendMessageToClient(String clientIp, String message) throws Exception {
+        Socket clientSocket = clientMap.get(clientIp);
+        if (clientSocket != null && !clientSocket.isClosed()) {
+            OutputStream out = clientSocket.getOutputStream();
+            byte[] encryptedResponse = Encryption.Encrypt(message, Encryption.secretKey);
+            out.write(encryptedResponse);
+            out.flush();
+            System.out.println("Sent to " + clientIp + ": " + message);
         } else {
-            System.out.println("Client " + clientIp + " not found.");
+            System.out.println("Client " + clientIp + " is not connected.");
         }
-    }
-
-    public static boolean checkforIP(String IP) {
-        return IP.matches("[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}");
     }
 }
