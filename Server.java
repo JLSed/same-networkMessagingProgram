@@ -5,19 +5,18 @@ import java.util.Map;
 public class Server {
     // location for all the connected clients
     private static Map<String, PrintWriter> clientsMap = new HashMap<>(); 
-
+    private static String publicKey = "";
     public static void main(String[] args) throws IOException {
         int port = 8080;
         ServerSocket serverSocket = new ServerSocket(port);
-        System.out.println("Server started on port " + port);
-        String publicKey = "";
+        
         // generates public key
         try {
             publicKey = Encryption.GenerateKey();
         } catch (Exception e) {
             System.out.println("Error occured while generating public key: " + e.getMessage());
         }
-        System.out.println(publicKey);
+
         while (true) {
             Socket clientSocket = serverSocket.accept();
             System.out.println("Client connected: " + clientSocket.getInetAddress());
@@ -36,10 +35,13 @@ public class Server {
     private static void handleClient(Socket clientSocket) throws IOException {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-
+            
             String clientIp = clientSocket.getInetAddress().getHostAddress();
             clientsMap.put(clientIp, out);
-
+            // send public key to the client conneted
+            if (!publicKey.isEmpty()) {
+                sendMessageToClient(clientIp, publicKey);
+            }
             String inputLine;
             String currentInteraction = "";
             String message = "";
