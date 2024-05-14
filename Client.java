@@ -147,7 +147,6 @@ public class Client extends JFrame {
         messageField.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Pressed");
                 String message = messageField.getText();
                 if (!message.isEmpty() && !lastInteractedClient.isEmpty()) {
                     JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
@@ -169,7 +168,6 @@ public class Client extends JFrame {
                 if (lastInteractedClient == "") {
                     JOptionPane.showMessageDialog(null, "Select a contact first.");
                 } else {
-                    System.out.println(lastInteractedClient);
 
                     EditContact(lastInteractedClient);
                 }
@@ -272,8 +270,6 @@ public class Client extends JFrame {
         JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
                 JOptionPane.INFORMATION_MESSAGE);
 
-        System.out.println(socket);
-
     }
 
     private void SendingMessage(String message, String IP) {
@@ -282,7 +278,6 @@ public class Client extends JFrame {
             out.write(Encryption.Encrypt(IP, Encryption.secretKey));
             out.write(Encryption.Encrypt(message, Encryption.secretKey));
             out.flush();
-            System.out.println("send");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -291,46 +286,42 @@ public class Client extends JFrame {
     private void AcceptReceivingMessage() {
         try {
             InputStream in = socket.getInputStream();
-            System.out.println(socket);
             // Receive and decrypt response
             byte[] buffer = new byte[256];
             int bytesRead;
             bytesRead = in.read(buffer);
             if (bytesRead != -1) {
                 byte[] receivedBytes = new byte[bytesRead];
+                System.out.println("Received from server: " + receivedBytes);
                 System.arraycopy(buffer, 0, receivedBytes, 0, bytesRead);
                 String response = Encryption.Decrypt(receivedBytes, Encryption.secretKey);
                 if (VerifyClientIP(response)) {
                     messengerIPexist = contactIPinfo.containsValue(response);
-                    System.out.println(messengerIPexist);
                     messengerIP = response;
                 } else {
-                    System.out.println("else");
                     if (messengerIPexist) {
-                        System.out.println("if");
-                        MessageReceived(response);
+                        MessageReceived(response, lastInteractedClient);
                     } else {
                         NewContactMessageReceived(messengerIP, response);
                     }
 
                 }
-                System.out.println("Received from server: " + response);
             }
         } catch (Exception e) {
             e.getMessage();
         }
     }
 
-    private void MessageReceived(String message) {
-        JTextArea currentMessageScreen = messagePanels.get(lastInteractedClient);
-        currentMessageScreen.append(contactIPinfo.get(lastInteractedClient) + ": " + message + "\n");
-        System.out.println(message);
+    private void MessageReceived(String message, String contact) {
+        JTextArea currentMessageScreen = messagePanels.get(contact);
+        currentMessageScreen.append(contactIPinfo.get(contact) + ": " + message + "\n");
 
     }
 
     // this function will run when an unidentified contact messages the user
     private void NewContactMessageReceived(String messengerIP, String message) {
         addNewContact(messengerIP, messengerIP);
+        MessageReceived(message, messengerIP);
     }
 
     public static void main(String[] args) {
