@@ -24,24 +24,23 @@ public class Encryption {
 
     public static byte[] Encrypt(String message, String Key) throws Exception {
         Key key = new SecretKeySpec(Key.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS/padding");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(message.getBytes());
     }
 
     public static String Decrypt(byte[] encrypted, String Key) throws Exception {
         Key key = new SecretKeySpec(Key.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS/padding");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
         cipher.init(Cipher.DECRYPT_MODE, key);
         return new String(cipher.doFinal(encrypted));
     }
 
+    // generates 128 bits random key for encrypting and decrypting
     public static String GenerateKey() throws NoSuchAlgorithmException {
-
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(256);
+        keyGen.init(128);
         SecretKey secretKey = keyGen.generateKey();
-
         return Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 
