@@ -17,9 +17,6 @@ public class Server {
     public static void main(String[] args) {
         
         try {
-            // Generate AES key
-            
-
             ServerSocket serverSocket = new ServerSocket(PORT);
             System.out.println("Server started on port " + PORT);
 
@@ -38,26 +35,27 @@ public class Server {
     private static void handleClient(Socket clientSocket) {
         try (InputStream in = clientSocket.getInputStream();
              OutputStream out = clientSocket.getOutputStream()) {
+                String clientIP = "";
+                String message = "";
                 while (true) {
                     byte[] buffer = new byte[256];
             int bytesRead = in.read(buffer);
+            
             if (bytesRead != -1) {
                 byte[] receivedBytes = new byte[bytesRead];
                 System.arraycopy(buffer, 0, receivedBytes, 0, bytesRead);
 
                 // Decrypt the received bytes
                 String receivedMessage = Encryption.Decrypt(receivedBytes, Encryption.secretKey);
-                System.out.println("Received from client: " + receivedMessage);
-
-
-
-
-                // Encrypt response
-                String response = "Server received: " + receivedMessage;
-                byte[] encryptedResponse = Encryption.Encrypt(response, Encryption.secretKey);
-
-                // Send encrypted response
-                out.write(encryptedResponse);
+                System.out.println("Received from client: " + receivedBytes);
+                // check if the message is ip or not
+                    if (checkforIP(receivedMessage)) {
+                        clientIP = receivedMessage;
+                        sendMessageToClient(clientIP, clientIP);
+                    } else {
+                        message = receivedMessage;
+                        sendMessageToClient(clientIP, message);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -72,9 +70,12 @@ public class Server {
             byte[] encryptedResponse = Encryption.Encrypt(message, Encryption.secretKey);
             out.write(encryptedResponse);
             out.flush();
-            System.out.println("Sent to " + clientIp + ": " + message);
         } else {
             System.out.println("Client " + clientIp + " is not connected.");
         }
+    }
+
+    public static boolean checkforIP(String IP) {
+        return IP.matches("[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}");
     }
 }
