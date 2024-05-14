@@ -51,7 +51,7 @@ public class Server {
                 // check if the message is ip or not
                     if (checkforIP(receivedMessage)) {
                         clientIP = receivedMessage;
-                        sendMessageToClient(clientIP, clientIP);
+                        sendMessageToClient(clientIP, clientSocket.getInetAddress().getHostAddress());
                     } else {
                         message = receivedMessage;
                         sendMessageToClient(clientIP, message);
