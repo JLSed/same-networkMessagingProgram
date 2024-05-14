@@ -25,17 +25,18 @@ import java.io.*;
 import java.net.*;
 
 public class Client extends JFrame {
-    private static JPanel clientContainer;
-    private static Map<String, JTextArea> messagePanels;
-    private static Map<String, String> contactIPinfo;
+    private JPanel clientContainer;
+    private Map<String, JTextArea> messagePanels;
+    private Map<String, String> contactIPinfo;
     private Map<String, JButton> contactButtons;
     private JTextField messageField;
     private JButton btnAddClient;
     private JButton btnEditClient;
-    private static String lastInteractedClient = "";
+    private String lastInteractedClient = "";
     private JPanel chatContainer;
-    private static String serverAddress;
-    private static Socket socket;
+    private String serverAddress;
+    private Socket socket;
+    private String publicKey = "";
 
     public Client() {
         RunningMethods thread = new RunningMethods();
@@ -267,6 +268,7 @@ public class Client extends JFrame {
         System.out.println("Connected");
         JOptionPane.showMessageDialog(null, "Connected to " + serverAddress, "Server Connected",
                 JOptionPane.INFORMATION_MESSAGE);
+
         System.out.println(socket);
 
     }
@@ -295,6 +297,11 @@ public class Client extends JFrame {
                     messengerIPexist = contactIPinfo.containsValue(message);
                     messengerIP = message;
                 } else {
+                    // gets the public key from server
+                    if (publicKey.isEmpty()) {
+                        publicKey = message;
+                        System.out.println(publicKey);
+                    }
                     if (messengerIPexist) {
                         MessageReceived(message);
                     } else {
@@ -318,6 +325,14 @@ public class Client extends JFrame {
     // this function will run when an unidentified contact messages the user
     private void NewContactMessageReceived(String messengerIP, String message) {
         addNewContact(messengerIP, messengerIP);
+    }
+
+    private EncryptMessage(String message) {
+
+    }
+
+    private DecryptMessage(String message, String privateKey) {
+
     }
 
     public static void main(String[] args) {
