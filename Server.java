@@ -2,8 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
-
-public class MultiThreadedServer {
+public class Server {
     // location for all the connected clients
     private static Map<String, PrintWriter> clientsMap = new HashMap<>(); 
 
