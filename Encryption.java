@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class Encryption {
+    public static String secretKey = "hellohellohellohellohelo"; 
 
     public static byte[] Encrypt(String message, String Key) throws Exception {
         Key key = new SecretKeySpec(Key.getBytes(), "AES");
