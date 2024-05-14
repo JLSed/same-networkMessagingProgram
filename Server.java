@@ -32,6 +32,7 @@ public class Server {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 String clientAddress = clientSocket.getInetAddress().getHostAddress();
+                System.out.println(clientAddress + " Connected");
                 clientMap.put(clientAddress, clientSocket);
 
                 new Thread(() -> handleClient(clientSocket)).start();
